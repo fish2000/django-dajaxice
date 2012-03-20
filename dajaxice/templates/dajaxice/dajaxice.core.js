@@ -22,7 +22,7 @@ var Dajaxice = {
 
     call: function(dajaxice_function, dajaxice_callback, argv, custom_settings)
     {
-        var send_data = [];
+        var send_data = 'argv='+encodeURIComponent(JSON.stringify(argv));
         var is_callback_a_function = (typeof(dajaxice_callback) == 'function');
 
         if(!is_callback_a_function){
@@ -38,8 +38,6 @@ var Dajaxice = {
             error_callback = custom_settings['error_callback'];
         }
 
-        send_data.push('argv='+encodeURIComponent(JSON.stringify(argv)));
-        send_data = send_data.join('&');
         var oXMLHttpRequest = new XMLHttpRequest;
         oXMLHttpRequest.open('POST', '/{{DAJAXICE_URL_PREFIX}}/'+dajaxice_function+'/');
         oXMLHttpRequest.setRequestHeader("X-Requested-With", "XMLHttpRequest");
