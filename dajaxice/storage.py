@@ -35,6 +35,7 @@ from django.core.files.storage import Storage
 from dajaxice.core import DajaxiceRequest
 from django.template import loader, Context
 from django.core.files.temp import NamedTemporaryFile
+from django.core.files import File
 
 class DajaxiceStorage(Storage):
     
@@ -42,7 +43,7 @@ class DajaxiceStorage(Storage):
         self._tmp_file = None #keep reference to avoid tmp file deletion
         
     def _open(self, name, mode='rb'):
-        raise NotImplementedError("This backend doesn't support open.")
+        return File(open(self.path(name), mode))
     
     def save(self, name, content): 
         raise NotImplementedError("This backend doesn't support save.")
