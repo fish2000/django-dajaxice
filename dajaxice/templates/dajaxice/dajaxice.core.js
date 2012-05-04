@@ -1,8 +1,9 @@
 var Dajaxice = {
+
     {% for module in dajaxice_js_functions %}
         {% include "dajaxice/dajaxice_core_loop.js" %}
         {% endfor %}{% ifnotequal dajaxice_js_functions|length 0 %},{% endifnotequal %}
-
+    
     get_cookie: function(name)
     {
         var cookieValue = null;
@@ -19,40 +20,38 @@ var Dajaxice = {
         }
         return cookieValue;
     },
-
+    
     call: function(dajaxice_function, dajaxice_callback, argv, custom_settings)
     {
-        var send_data = 'argv='+encodeURIComponent(JSON.stringify(argv));
+        var send_data = 'argv=' + encodeURIComponent(JSON.stringify(argv));
         var is_callback_a_function = (typeof(dajaxice_callback) == 'function');
-
-        if(!is_callback_a_function){
+        
+        if (!is_callback_a_function) {
             alert("dajaxice_callback should be a function since dajaxice 0.2")
         }
-
-        if(custom_settings == undefined){
+        
+        if (custom_settings == undefined) {
             custom_settings = {};
         }
-
+        
         var error_callback = this.get_setting('default_exception_callback');
-        if('error_callback' in custom_settings && typeof(custom_settings['error_callback']) == 'function'){
+        if ('error_callback' in custom_settings && typeof(custom_settings['error_callback']) == 'function') {
             error_callback = custom_settings['error_callback'];
         }
-
+        
         var oXMLHttpRequest = new XMLHttpRequest;
-        oXMLHttpRequest.open('POST', '/{{DAJAXICE_URL_PREFIX}}/'+dajaxice_function+'/');
+        oXMLHttpRequest.open('POST', '/{{ DAJAXICE_URL_PREFIX }}/' + dajaxice_function + '/');
         oXMLHttpRequest.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-        oXMLHttpRequest.setRequestHeader("X-CSRFToken",Dajaxice.get_cookie('csrftoken'));
+        oXMLHttpRequest.setRequestHeader("X-CSRFToken", Dajaxice.get_cookie('csrftoken'));
         oXMLHttpRequest.onreadystatechange = function() {
             if (this.readyState == XMLHttpRequest.DONE) {
-                if(this.responseText == Dajaxice.EXCEPTION || !(this.status in Dajaxice.valid_http_responses())){
+                if (this.responseText == Dajaxice.EXCEPTION || !(this.status in Dajaxice.valid_http_responses())) {
                     error_callback(this);
-                }
-                else{
+                } else {
                     var response;
                     try {
                         response = JSON.parse(this.responseText);
-                    }
-                    catch (exception) {
+                    } catch(exception) {
                         response = this.responseText;
                     }
                     dajaxice_callback(response);
@@ -62,32 +61,41 @@ var Dajaxice = {
         oXMLHttpRequest.send(send_data);
         return oXMLHttpRequest;
     },
-
+    
     setup: function(settings)
     {
         this.settings = settings;
     },
-
-    get_setting: function(key){
-        if(this.settings == undefined || this.settings[key] == undefined){
+    
+    get_setting: function(key) {
+        if (this.settings == undefined || this.settings[key] == undefined) {
             return this.default_settings[key];
         }
         return this.settings[key];
     },
-
-    default_exception_callback: function(response){
-        alert('Something goes wrong:\n' + 
-              'Status: ' + response.status + '\n' + 
-              'Response text: ' + response.responseText);
+    
+    default_exception_callback: function(response) {
+        var user_alert = alert;
+        try { user_alert = console.log; } catch (e) {};
+        user_alert('Something goes wrong:\n' +
+            'Status: ' + response.status + '\n' +
+            'Response text: ' + response.responseText);
     },
-
-    valid_http_responses: function(){
-        return {200: null, 301: null, 302: null, 304: null}
+    
+    valid_http_responses: function() {
+        return {
+            200: null,
+            301: null,
+            302: null,
+            304: null
+        }
     }
 };
 
 Dajaxice.EXCEPTION = '{{ DAJAXICE_EXCEPTION }}';
-Dajaxice.default_settings = {'default_exception_callback': Dajaxice.default_exception_callback}
+Dajaxice.default_settings = {
+    'default_exception_callback': Dajaxice.default_exception_callback
+}
 
 window['Dajaxice'] = Dajaxice;
 
