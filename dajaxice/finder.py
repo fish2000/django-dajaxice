@@ -38,6 +38,8 @@ except ImportError:
 
 from .storage import DajaxiceStorage
 
+from dajaxice.core import dajaxice_autodiscover
+dajaxice_autodiscover()
 
 class DajaxiceFinder(BaseStorageFinder):
     
