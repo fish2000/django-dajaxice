@@ -1,5 +1,5 @@
 #----------------------------------------------------------------------
-# Copyright (c) 2009-2011 Benito Jorge Bastida
+# Copyright (c) 2012 David Charbonnier
 # All rights reserved.
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions are
@@ -13,11 +13,11 @@
 #      the documentation and/or other materials provided with the
 #      distribution.
 #
-#    o Neither the name of Digital Creations nor the names of its
+#    o Neither the name of Oxys nor the names of its
 #      contributors may be used to endorse or promote products derived
 #      from this software without specific prior written permission.
 #
-#  THIS SOFTWARE IS PROVIDED BY DIGITAL CREATIONS AND CONTRIBUTORS *AS
+#  THIS SOFTWARE IS PROVIDED BY OXYS AND CONTRIBUTORS *AS
 #  IS* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
 #  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
 #  PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL DIGITAL
@@ -31,29 +31,17 @@
 #  DAMAGE.
 #----------------------------------------------------------------------
 
-import logging
+try:
+    from staticfiles.finders import BaseStorageFinder
+except ImportError:
+    from django.contrib.staticfiles.finders import BaseStorageFinder
 
-from django import template
-
-from django.middleware.csrf import get_token
-
-from django.contrib.staticfiles.storage import staticfiles_storage
-
-register = template.Library()
-
-log = logging.getLogger('dajaxice')
+from .storage import DajaxiceStorage
 
 
-@register.inclusion_tag('dajaxice/dajaxice_js_import.html', takes_context=True)
-def dajaxice_js_import(context):
-    # We must force this request to add the csrftoken cookie.
-    request = context.get('request', None)
-    if request:
-        get_token(request)
-    else:
-        log.warning("The 'request' object must be accesible within the context. \
-                     You must add 'django.contrib.messages.context_processors.request' \
-                     to your TEMPLATE_CONTEXT_PROCESSORS and render your views\
-                     using a RequestContext.")
+class DajaxiceFinder(BaseStorageFinder):
+    
+    def __init__(self, *args, **kwargs):
+        super(DajaxiceFinder, self).__init__(storage=DajaxiceStorage, *args, **kwargs)
         
-    return {'core_url': staticfiles_storage.url('dajaxice/dajaxice.core.js')}
+ 
